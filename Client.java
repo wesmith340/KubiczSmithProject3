@@ -22,7 +22,6 @@ public class Client {
     // For the individual connections, again you can re-use the Connection class, and add some event handlers to process event codes that will be used to distibguis betwwen peer-to-peer or cleint-server communications, or create a separate class called peerConnection. It is completely your choice.
     public static void main(String args[])
     {
-        
         Client client = new Client();
         boolean runClient=true;
         Scanner input = new Scanner(System.in);
@@ -183,7 +182,6 @@ public class Client {
         p.req_file_index=findex;
         send_packet_to_server(p);
         //disconnect();
-
     }
 
     void disconnect()
@@ -247,7 +245,7 @@ class PacketHandler extends Thread
      }
 
     }
-    
+
     void PeerToPeerHandler(InetAddress remotePeerIP, int remotePortNum, int remotePeerID, int findex)
     {
         // To implement.
@@ -263,7 +261,30 @@ class PacketHandler extends Thread
         //once, file has been received, send update file request to server.
         
     }
+}
+public class FileGetter extends Thread{
+    Socket fileSocket;
+    ObjectInputStream inputStream;
+    ObjectOuputStream outputStream;
 
+    Client client;
 
+    InetAddress remotePeerIP;
+    int remotePortNum, remotePeerID, findex;
+    boolean running = true;
+    boolean correctFile = false;
 
+    public FileGetter (Client client, InetAddress remotePeerIP, int remotePortNum, int remotePeerID, int findex) {
+        this.client = client;
+        this.remotePeerIP = remotePeerIP;
+        this.remotePortNum = remotePortNum;
+        this.remotePeerID = remotePeerID;
+        this.findex = findex;
+    }
+
+    public void run() {
+
+        while (running&&!correctFile)
+
+    }
 }
