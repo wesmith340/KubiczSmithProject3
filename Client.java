@@ -278,7 +278,6 @@ class PacketHandler extends Thread
                 System.out.println("Server says that no client has file "+p.req_file_index);
             else{
                 System.out.println("Server says that peer "+p.peerID+" on listening port "+p.peer_listen_port+" has file "+p.req_file_index);
-                //PeerToPeerHandler(p.peerIP,p.peer_listen_port,p.req_file_index,p.req_file_index); // TO DO
                 fileGetter = new FileGetter(client, p.peerIP,p.peer_listen_port,p.req_file_index,p.req_file_index);
             }
             break;
@@ -293,22 +292,6 @@ class PacketHandler extends Thread
 
      }
 
-    }
-
-    void PeerToPeerHandler(InetAddress remotePeerIP, int remotePortNum, int remotePeerID, int findex)
-    {
-        // To implement.
-        
-        // connect to peer
-        // while file not received correctly
-            // request_file_from_peer
-            // receive_file_from_peer
-            // verify file_hash
-            // if correct, send positve ack, break
-            // if incorrect, send negative ack, loop back
-            
-        //once, file has been received, send update file request to server.
-        
     }
 }
 
