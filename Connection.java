@@ -97,6 +97,7 @@ class Connection extends Thread
         send_packet_to_client(p);
     }
 
+    // Override this please
     public void eventHandler(Packet p)
     {
         int event_type = p.event_type;
@@ -129,6 +130,7 @@ class Connection extends Thread
         printConnections();
     }
 
+    // Override this please
     public void clientReqFile(Packet p)
     {
        System.out.println("Client "+p.sender+" is requesting file "+p.req_file_index);
@@ -148,9 +150,6 @@ class Connection extends Thread
             }
         }
         send_packet_to_client(packet);
-
-        
-
     }
 
     public void clientWantsToQuit(Packet p)
@@ -164,6 +163,7 @@ class Connection extends Thread
 
     }
 
+    // Not needed for peer connection
     public int searchForClient(int ID)
     {
         for (int i=0;i<connectionList.size();i++)
@@ -173,12 +173,14 @@ class Connection extends Thread
         }
         return -1;
     }
-    
+
+    // Not needed for peer connection
      public void clientGotFile(Packet p)
     {
        FILE_VECTOR[p.req_file_index] = '1';
     }
 
+    // Not needed for peer connection
     /**
      * @author Weston Smith
      * @param p
