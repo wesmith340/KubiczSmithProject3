@@ -1,5 +1,7 @@
 import java.io.*;
 import java.net.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -66,6 +68,7 @@ class Connection extends Thread
         try
         { 
             outputStream.writeObject(p);
+            outputStream.flush();
             System.out.println("Packet Sent ");
             //p.printPacket();
         }
@@ -111,8 +114,8 @@ class Connection extends Thread
             case 3:
             clientGotFile(p);break; // To Do
             
-           // case 4: //if implementing peer-to-peer connections in the same class
-           //  clientReqFileFromPeer(p);break;
+            case 4:
+                hashRequest(p);break;
         };
     }
 
@@ -173,7 +176,59 @@ class Connection extends Thread
     
      public void clientGotFile(Packet p)
     {
-       // To implement
+       FILE_VECTOR[p.req_file_index] = '1';
     }
 
+    /**
+     * @author Weston Smith
+     * @param p
+     */
+    public void hashRequest(Packet p) {
+        byte[] file = generate_file(p.req_file_index, 20000);
+        String hash = find_file_hash(file);
+
+        Packet packet = new Packet();
+        packet.event_type = 3;
+        packet.fileHash = hash;
+
+        send_packet_to_client(packet);
+    }
+//----------------------------------------------------------------------------------------------------------------------
+    // Hashing methods
+    public byte[] generate_file(int findex, int length)
+    {
+        byte[] buf= new byte[length];
+        Random r = new Random();
+        r.setSeed(findex);
+        r.nextBytes(buf);
+        try{
+            System.out.println(SHAsum(buf));
+        }
+        catch (Exception e){System.out.println("SHA1 error!");}
+        return buf;
+    }
+    public String find_file_hash(byte [] buf)
+    {
+        String h = "";
+        try {
+            h = SHAsum(buf);
+        } catch (NoSuchAlgorithmException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return h;
+    }
+
+    public String SHAsum(byte[] convertme) throws NoSuchAlgorithmException{
+        MessageDigest md = MessageDigest.getInstance("SHA-1");
+        return byteArray2Hex(md.digest(convertme));
+    }
+
+    private static String byteArray2Hex(byte[] hash) {
+        Formatter formatter = new Formatter();
+        for (byte b : hash) {
+            formatter.format("%02x", b);
+        }
+        return formatter.toString();
+    }
 }

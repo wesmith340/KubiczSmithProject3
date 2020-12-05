@@ -406,6 +406,7 @@ class FileGetter extends Thread{
         }
         disconnect();
         client.gettingFile = false;
+        client.FILE_VECTOR[findex] = '1';
     }
 
     /**
