@@ -311,6 +311,12 @@ class PacketHandler extends Thread
         
     }
 }
+
+/**
+ * FileGetter class
+ * @author Weston Smith
+ * This class is designed to retrieve a file from another client
+ */
 class FileGetter extends Thread{
     Socket fileSocket;
     ObjectOutputStream outputStream ;
@@ -329,6 +335,14 @@ class FileGetter extends Thread{
     int blockSize = 1000;
     String hashCheck = null;
 
+    /**
+     * Constructor
+     * @param client
+     * @param remotePeerIP
+     * @param remotePortNum
+     * @param remotePeerID
+     * @param findex
+     */
     public FileGetter (Client client, InetAddress remotePeerIP, int remotePortNum, int remotePeerID, int findex) {
         fileVector = new byte[fileSize];
 
@@ -339,6 +353,9 @@ class FileGetter extends Thread{
         this.findex = findex;
     }
 
+    /**
+     * Implements runnable
+     */
     public void run() {
         // Connect with peer
         try {
@@ -349,6 +366,7 @@ class FileGetter extends Thread{
             e.printStackTrace();
         }
 
+        // Keep going until file is correctly received or until told to stop
         while (running&&!correctFile) {
             try {
                 requestFile();
@@ -366,6 +384,8 @@ class FileGetter extends Thread{
                     e.printStackTrace();
                 }
             }
+
+            // Ask server for hash to verify the file
             try {
                 Packet p = new Packet();
                 p.event_type = 3;
@@ -384,6 +404,8 @@ class FileGetter extends Thread{
                     e.printStackTrace();
                 }
             }
+
+            // Check the file's hash with the server's hash
             String fileHash = client.find_file_hash(fileVector);
             Packet p = new Packet();
             p.event_type = 3;
@@ -402,7 +424,12 @@ class FileGetter extends Thread{
         disconnect();
         client.gettingFile = false;
     }
-    void requestFile() throws IOException {
+
+    /**
+     * This method requests a file from another client
+     * @throws IOException
+     */
+    private void requestFile() throws IOException {
         Packet p = new Packet();
         p.sender=client.peerID;
         p.event_type=1;
@@ -412,7 +439,12 @@ class FileGetter extends Thread{
         outputStream.writeObject(p);
         outputStream.flush();
     }
-    void processPacket(Packet p) {
+
+    /**
+     * This method processes incoming packets from another client
+     * @param p
+     */
+    private void processPacket(Packet p) {
         switch (p.event_type) {
             case 2:
                 storePacket(p);
@@ -422,17 +454,27 @@ class FileGetter extends Thread{
                 break;
         }
     }
-    void storePacket(Packet p){
+
+    /**
+     * This method store a packets contents to a byte array
+     * @param p
+     */
+    private void storePacket(Packet p){
         for (int i = 0; i<blockSize; i++) {
             fileVector[i*blockNum] = p.DATA_BLOCK[i];
         }
     }
-    void disconnect()
+
+    /**
+     * This method severs the connection
+     */
+    private void disconnect()
     {
         try {
             outputStream.close();
             inputStream.close();
             fileSocket.close();
+            running = false;
             System.out.println("Closed connection with peer");
         }
         catch (Exception e) { System.out.println("Couldn't close connection with peer!");}
