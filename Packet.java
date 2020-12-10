@@ -35,10 +35,7 @@ class Packet implements Serializable{
         Arrays.fill(FILE_VECTOR,'0');
         DATA_BLOCK = new byte[data_block_size];
         //Arrays.fill(DATA_BLOCK,'0');
-        
     }
-
-
     void printPacket()
     {
         System.out.println("Packet Contents");
