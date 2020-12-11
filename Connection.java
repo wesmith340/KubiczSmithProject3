@@ -63,6 +63,7 @@ class Connection extends Thread
         }
     }
 
+<<<<<<< Updated upstream
     public void send_packet_to_client(Packet p)
     {
         try
@@ -75,6 +76,13 @@ class Connection extends Thread
         catch(Exception e){
             System.out.println ("Could not send packet! ");
         }
+=======
+    public void send_packet_to_client(Packet p) throws IOException {
+        outputStream.writeObject(p);
+        outputStream.flush();
+        System.out.println("Packet Sent ");
+        //p.printPacket();
+>>>>>>> Stashed changes
     }
     public void closeConnection()
     {
@@ -94,7 +102,11 @@ class Connection extends Thread
     {
         Packet p = new Packet();
         p.event_type=6;
-        send_packet_to_client(p);
+        try {
+            send_packet_to_client(p);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     // Override this please
@@ -162,8 +174,6 @@ class Connection extends Thread
         closeConnection();
 
     }
-
-    // Not needed for peer connection
     public int searchForClient(int ID)
     {
         for (int i=0;i<connectionList.size();i++)

@@ -53,7 +53,5 @@ class Packet implements Serializable{
         System.out.println("Peer Listen Port : "+peer_listen_port);
         System.out.println("File Vector : "+String.valueOf(FILE_VECTOR));
     }
-
-
 }
 
