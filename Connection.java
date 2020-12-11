@@ -3,9 +3,8 @@ import java.net.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.concurrent.*;
 
-class Connection extends Thread
+abstract class Connection extends Thread
 {
     Socket socket;
     ObjectInputStream inputStream;
@@ -18,6 +17,10 @@ class Connection extends Thread
     ArrayList<Connection> connectionList;    
     boolean runFlag=true;
 
+    public Connection () {
+        runFlag=false;
+    }
+
     public Connection(Socket socket, ArrayList<Connection> connectionList) throws IOException
     {
         this.connectionList=connectionList;
@@ -26,7 +29,6 @@ class Connection extends Thread
         this.inputStream=new ObjectInputStream(socket.getInputStream());
         this.peerIP=socket.getInetAddress();
         this.peerPort=socket.getPort();
-        
     }
 
     @Override
@@ -35,11 +37,11 @@ class Connection extends Thread
         Packet p= new Packet();
 
         try {p = (Packet) inputStream.readObject();}
-        catch (Exception e) {System.out.println("Could not register client");return;} 
+        catch (Exception e) {System.out.println("Could not register client");return;}
         eventHandler(p);
-        
+
         while (runFlag){
-            try { 
+            try {
                 //printConnections();
                 p = (Packet) inputStream.readObject();
                 eventHandler(p);
@@ -47,42 +49,25 @@ class Connection extends Thread
 
             }
             catch (Exception e) {break;}
-
         }
-
     }
 
     public void printConnections()
     {
-        System.out.println("---------------"); 
-        for(int i = 0; i < connectionList.size(); i++) {  
-            
+        System.out.println("---------------");
+        for(int i = 0; i < connectionList.size(); i++) {
+
             System.out.println("Peer ID :"+connectionList.get(i).peerID);
             System.out.println("FILE_VECTOR :"+String.valueOf(connectionList.get(i).FILE_VECTOR));
-            System.out.println("---------------"); 
+            System.out.println("---------------");
         }
     }
 
-<<<<<<< Updated upstream
-    public void send_packet_to_client(Packet p)
-    {
-        try
-        { 
-            outputStream.writeObject(p);
-            outputStream.flush();
-            System.out.println("Packet Sent ");
-            //p.printPacket();
-        }
-        catch(Exception e){
-            System.out.println ("Could not send packet! ");
-        }
-=======
     public void send_packet_to_client(Packet p) throws IOException {
         outputStream.writeObject(p);
         outputStream.flush();
         System.out.println("Packet Sent ");
         //p.printPacket();
->>>>>>> Stashed changes
     }
     public void closeConnection()
     {
@@ -93,8 +78,8 @@ class Connection extends Thread
                 System.out.println("Closed clientSocket");
             }
             catch (Exception e) { System.out.println("Couldn't close socket!");
-            //e.printStackTrace(); 
-                
+            //e.printStackTrace();
+
         }
     }
 
@@ -109,28 +94,9 @@ class Connection extends Thread
         }
     }
 
-    // Override this please
-    public void eventHandler(Packet p)
-    {
-        int event_type = p.event_type;
-        switch (event_type)
-        {
-            case 0: //client register
-            clientRegister(p);break;
-            
-            case 1: // client is requesting a file 
-            clientReqFile(p);break;
+    abstract public void eventHandler(Packet p);
 
-            case 5:
-            clientWantsToQuit(p);break;
-            
-            case 3:
-            clientGotFile(p);break; // To Do
-            
-            case 4:
-                hashRequest(p);break;
-        };
-    }
+    abstract public void clientReqFile(Packet p);
 
     public void clientRegister(Packet p)
     {
@@ -140,28 +106,6 @@ class Connection extends Thread
         connectionList.add(this);
         System.out.println("Client connected. Total Registered Clients : "+connectionList.size() );
         printConnections();
-    }
-
-    // Override this please
-    public void clientReqFile(Packet p)
-    {
-       System.out.println("Client "+p.sender+" is requesting file "+p.req_file_index);
-       int findex = p.req_file_index;
-       Packet packet = new Packet();
-        packet.event_type=2;
-        packet.req_file_index=findex;
-
-         for (int i=0;i<connectionList.size();i++)
-        {
-            if (connectionList.get(i).FILE_VECTOR[findex]=='1')
-            {
-                packet.peerID=connectionList.get(i).peerID;
-                packet.peer_listen_port=connectionList.get(i).peer_listen_port;
-                break;
-                
-            }
-        }
-        send_packet_to_client(packet);
     }
 
     public void clientWantsToQuit(Packet p)
@@ -182,28 +126,6 @@ class Connection extends Thread
                 return i;
         }
         return -1;
-    }
-
-    // Not needed for peer connection
-     public void clientGotFile(Packet p)
-    {
-       FILE_VECTOR[p.req_file_index] = '1';
-    }
-
-    // Not needed for peer connection
-    /**
-     * @author Weston Smith
-     * @param p
-     */
-    public void hashRequest(Packet p) {
-        byte[] file = generate_file(p.req_file_index, 20000);
-        String hash = find_file_hash(file);
-
-        Packet packet = new Packet();
-        packet.event_type = 3;
-        packet.fileHash = hash;
-
-        send_packet_to_client(packet);
     }
 //----------------------------------------------------------------------------------------------------------------------
     // Hashing methods

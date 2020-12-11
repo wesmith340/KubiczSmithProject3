@@ -25,7 +25,7 @@ class ServerSocketHandler extends Thread
                 System.out.println("A new client is connecting.. : " + clientSocket);
                 System.out.println("Port : " + clientSocket.getPort());
                 System.out.println("IP : " + clientSocket.getInetAddress().toString());
-                Connection conn = new Connection(clientSocket, s.connectionList);
+                ServerConnection conn = new ServerConnection(clientSocket, s.connectionList);
                 //connectionList.add(conn);
                 conn.start();
 
