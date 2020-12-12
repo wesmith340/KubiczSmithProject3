@@ -1,4 +1,3 @@
-
 import java.util.*;
 import java.io.*;
 import java.io.*;
@@ -8,11 +7,11 @@ import java.util.*;
 class Packet implements Serializable{
     int sender;
     int recipient;
-    int event_type; 
+    int event_type;
     int port_number;  // for reporting listening port number
     int req_file_index; //
     InetAddress peerIP; // for telling the client the peer IP
-    int peerID; 
+    int peerID;
     int peer_listen_port;
     char FILE_VECTOR[];
     int data_block_size=1000; //each packet can carry 1000 bytes of data
@@ -51,4 +50,3 @@ class Packet implements Serializable{
         System.out.println("File Vector : "+String.valueOf(FILE_VECTOR));
     }
 }
-

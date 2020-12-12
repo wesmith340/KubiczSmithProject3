@@ -5,6 +5,10 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 
+/**
+ * PeerConnection class
+ * @author Adriana Kubicz
+ */
 public class PeerConnection extends Connection{
     public PeerConnection(Socket socket, ArrayList<Connection> connectionList) throws IOException
     {
@@ -21,29 +25,34 @@ public class PeerConnection extends Connection{
                 clientReqFile(p);break;
 
             case 5:
-                clientWantsToQuit(p);break;
+                clientWantsToQuit(p);
+                System.out.println("Closed clientSocket");
+                break;
         };
     }
 
-    public void clientReqFile(Packet p)
-    {
+    public void clientReqFile(Packet p) {
         boolean sendingFile = true;
         int findex = p.req_file_index;
         byte[] file = generate_file(findex, 20000);
-        for (int blockNum = 0; blockNum < 20&&sendingFile; blockNum++) {
+
+        for (int blockNum = 0; blockNum < 20 && sendingFile; blockNum++) {
             byte[] block = new byte[1000];
-            for(int i = 0; i<1000; i++){
-                block[i] = file[blockNum*1000+i];
+
+            for(int i = 0; i<1000; i++) {
+                block[i] = file[blockNum * 1000 + i];
             }
             Packet packet = new Packet();
             packet.event_type = 2;
             packet.DATA_BLOCK = block;
             try {
                 send_packet_to_client(packet);
+                System.out.println("Sending File " + findex + " Block " + blockNum + " to peer " + p.sender);
+                Thread.sleep(1000);
 
-                Thread.sleep(500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
+
             } catch (IOException e) {
                 sendingFile = false;
                 super.connectionList.remove(this);

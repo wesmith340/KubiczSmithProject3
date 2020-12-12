@@ -1,4 +1,3 @@
-
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -30,7 +29,7 @@ class ServerSocketHandler extends Thread
                 conn.start();
 
             }
-            catch (SocketException e){  
+            catch (SocketException e){
                 System.out.println("Shutting down Server....");
                 // send a message to all clients that I want to quit.
                 for (Connection c: connectionList)
@@ -42,8 +41,8 @@ class ServerSocketHandler extends Thread
                 break;
 
             }
-            catch (IOException e){  
-                e.printStackTrace(); 
+            catch (IOException e){
+                e.printStackTrace();
             }
 
 

@@ -14,7 +14,7 @@ abstract class Connection extends Thread
     int peerID;
     InetAddress peerIP;
     char FILE_VECTOR[];
-    ArrayList<Connection> connectionList;    
+    ArrayList<Connection> connectionList;
     boolean runFlag=true;
 
     public Connection () {
@@ -45,7 +45,7 @@ abstract class Connection extends Thread
                 //printConnections();
                 p = (Packet) inputStream.readObject();
                 eventHandler(p);
-               // p.printPacket();
+                // p.printPacket();
 
             }
             catch (Exception e) {break;}
@@ -66,18 +66,18 @@ abstract class Connection extends Thread
     public void send_packet_to_client(Packet p) throws IOException {
         outputStream.writeObject(p);
         outputStream.flush();
-        System.out.println("Packet Sent ");
+        // System.out.println("Packet Sent ");
         //p.printPacket();
     }
     public void closeConnection()
     {
-        try { 
-                outputStream.close();
-                inputStream.close();
-                socket.close();
-                System.out.println("Closed clientSocket");
-            }
-            catch (Exception e) { System.out.println("Couldn't close socket!");
+        try {
+            outputStream.close();
+            inputStream.close();
+            socket.close();
+            System.out.println("Closed clientSocket");
+        }
+        catch (Exception e) { System.out.println("Couldn't close socket!");
             //e.printStackTrace();
 
         }
@@ -127,7 +127,7 @@ abstract class Connection extends Thread
         }
         return -1;
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     // Hashing methods
     public byte[] generate_file(int findex, int length)
     {

@@ -24,7 +24,8 @@ public class ServerConnection extends Connection{
                 clientWantsToQuit(p);break;
 
             case 3: // client has the file
-                clientGotFile(p);break;
+                clientGotFile(p);
+                break;
 
             case 4: // client is requesting a file hash
                 hashRequest(p);break;
@@ -67,7 +68,7 @@ public class ServerConnection extends Connection{
         Packet packet = new Packet();
         packet.event_type = 3;
         packet.fileHash = hash;
-        System.out.println("User "+peerID+" is requesting a hash");
+        System.out.println("Client " + peerID + " is requesting file " + p.req_file_index);
 
         try {
             send_packet_to_client(packet);
@@ -78,7 +79,12 @@ public class ServerConnection extends Connection{
 
     public void clientGotFile(Packet p)
     {
-        System.out.println("Update file vector");
+        System.out.println("-----");
+        System.out.println("Updating client " + p.sender + " file vector");
         FILE_VECTOR[p.req_file_index] = '1';
+
+        for(int i = 0; i < connectionList.size(); i++) {
+            System.out.println("FILE_VECTOR :"+String.valueOf(connectionList.get(i).FILE_VECTOR));
+        }
     }
 }

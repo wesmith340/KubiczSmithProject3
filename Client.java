@@ -44,7 +44,7 @@ public class Client {
         try
         {
             //if (client.ip==null)
-                client.ip = InetAddress.getByName("localhost");
+            client.ip = InetAddress.getByName("localhost");
 
             client.s = new Socket(client.ip, client.serverPort);
             client.outputStream = new ObjectOutputStream(client.s.getOutputStream());
@@ -75,10 +75,15 @@ public class Client {
                 switch(cmd)
                 {
                     case 'q':
-                        System.out.println("Getting ready to quit ..." +client.s);
-                        handler.quitFileGetter();
+                        System.out.println("Getting ready to quit ..." + client.s);
                         client.send_quit_to_server();
-                        runClient=false;
+                        handler.quitFileGetter();
+                        runClient = false;
+
+                        try {client.listener.close();
+                            Thread.sleep(2000);}
+                        catch(Exception e) { e.printStackTrace();}
+
                         break;
 
                     case 'f':
@@ -186,21 +191,22 @@ public class Client {
 
     }
 
-    public void send_req_for_file(int findex)
-    {
+    public void send_req_for_file(int findex) {
         gettingFile = true;
-        if (FILE_VECTOR[findex] =='1'){
+
+        if (FILE_VECTOR[findex] =='1') {
             System.out.println("I already have this file block!");
             gettingFile = false;
             return;
         }
         System.out.println(" I don't have this file. Let me contact server...");
-        //request file from server
+
         Packet p = new Packet();
-        p.sender=peerID;
-        p.event_type=1;
-        p.peer_listen_port=peer_listen_port;
-        p.req_file_index=findex;
+        p.sender = peerID;
+        p.event_type = 1;
+        p.peer_listen_port = peer_listen_port;
+        p.req_file_index = findex;
+
         send_packet_to_server(p);
         //disconnect();
     }
@@ -278,18 +284,20 @@ class PacketHandler extends Thread
         switch (e)
         {
             case 2: //server reply for req. file
-                if (p.peerID==-1)
-                    System.out.println("Server says that no client has file "+p.req_file_index);
+                if (p.peerID==-1) {
+                    System.out.println("Server says that no client has file " + p.req_file_index);
+                    client.gettingFile = false;
+                }
                 else {
                     System.out.println("Server says that peer "+p.peerID+" on listening port "+p.peer_listen_port+" has file "+p.req_file_index);
-                    fileGetter = new FileGetter(client, p.peerIP,p.peer_listen_port,p.req_file_index,p.req_file_index);
+                    fileGetter = new FileGetter(client, p.peerIP,p.peer_listen_port,p.peerID,p.req_file_index);
                     fileGetter.start();
                 }
                 break;
             case 3:
-                System.out.println(p.fileHash);
                 fileGetter.gotHash = true;
                 fileGetter.hashCheck = p.fileHash;
+
                 break;
 
             case 6: //server wants to quit. I should too.
@@ -366,9 +374,9 @@ class FileGetter extends Thread{
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        
         // Keep going until file is correctly received or until told to stop
-        while (running&&!correctFile) {
+        while (running && !correctFile) {
             try {
                 requestFile();
             } catch (IOException e) {
@@ -379,6 +387,7 @@ class FileGetter extends Thread{
             for (blockNum = 0; blockNum < 20&&running; blockNum++) {
                 try {
                     processPacket((Packet)inputStream.readObject());
+                    System.out.println("Receiving File " + findex + " Block " + blockNum + " from peer " + remotePeerID);
                 } catch (IOException e) {
 
                 } catch (ClassNotFoundException e) {
@@ -393,7 +402,7 @@ class FileGetter extends Thread{
             client.send_packet_to_server(p1);
 
             // Wait for packet handler to receive hashCheck
-            while (running&&!gotHash){
+            while (running &&! gotHash){
                 try {
                     this.sleep(10);
                 } catch (InterruptedException e) {
@@ -404,17 +413,28 @@ class FileGetter extends Thread{
             String fileHash = client.find_file_hash(fileVector);
             Packet p = new Packet();
 
-            if (running&&hashCheck.equals(fileHash)){
+            if (running) {
+                System.out.println("-----");
+                System.out.println("Expected Hash: " + hashCheck);
+                System.out.println("Received Hash: " + fileHash);
+                System.out.println("-----");
+            }
+
+            if (running && hashCheck.equals(fileHash)) {
                 correctFile = true;
+
                 p.event_type = 3;
                 p.req_file_index = findex;
                 p.gotFile = true;
+
                 client.send_packet_to_server(p);
-            } else {
-                correctFile = false;
-            }
+                System.out.println("Sending true Acknowledgement...");
+
+            } else { correctFile = false;}
         }
-        disconnect();
+
+        if (running) disconnect();
+
         client.gettingFile = false;
         gotHash = false;
         client.FILE_VECTOR[findex] = '1';
@@ -470,7 +490,9 @@ class FileGetter extends Thread{
             inputStream.close();
             fileSocket.close();
             running = false;
-            System.out.println("Closed connection with peer");
+
+            System.out.println("Closing connection to " + remotePeerID);
+            System.out.println();
         }
         catch (Exception e) { System.out.println("Couldn't close connection with peer!");}
     }
